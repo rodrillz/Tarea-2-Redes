@@ -31,16 +31,16 @@ def comandos(cliente_socket, comando, addr):
         cliente_socket.send(f"[SERVER] Usuarios conectados: {', '.join(lista_usuarios)}\n".encode())
 
     elif comando.startswith(":smile"): # Comando para carita feliz
-        mensaje_para_todos(f"{nombres_clientes[addr]}: :)".encode())
+        mensaje_para_todos(f"{nombres_clientes[client_socket]}: :)".encode())
 
     elif comando.startswith(":angry"): # Comando para carita enojada
-        mensaje_para_todos(f"{nombres_clientes[addr]}: >:(".encode())
+        mensaje_para_todos(f"{nombres_clientes[client_socket]}: >:(".encode())
 
     elif comando.startswith(":combito"): # Comando para combito
-        mensaje_para_todos(f"{nombres_clientes[addr]}: Q(’- ’Q)".encode())
+        mensaje_para_todos(f"{nombres_clientes[client_socket]}: Q(’- ’Q)".encode())
 
     elif comando.startswith(":larva"): # Comando para larva
-        mensaje_para_todos(f"{nombres_clientes[addr]}: (:o)OOOooo".encode())
+        mensaje_para_todos(f"{nombres_clientes[client_socket]}: (:o)OOOooo".encode())
 
     elif comando.startswith(":artefactos"): # Comando para mostrar los artefactos del cliente
         cliente_socket.send(f"[SERVER] Tus artefactos son: {', '.join(artefactos_clientes[cliente_socket])}\n".encode())
@@ -53,7 +53,7 @@ def comandos(cliente_socket, comando, addr):
     elif comando.startswith(":offer"): # Comando para ofrecer intercambio
         _, destinatario, mi_artefacto, su_artefacto = comando.split(" ", 3)
         destinatario_socket = clientes[int(destinatario)]
-        destinatario_socket.send(f"[OFERTA] {addr} quiere intercambiar {artefactos_dict[mi_artefacto]} por {artefactos_dict[su_artefacto]}. ¿Aceptas? Responde con :accept o :reject\n".encode())
+        destinatario_socket.send(f"[OFERTA] {nombres_clientes[client_socket]} quiere intercambiar {artefactos_dict[mi_artefacto]} por {artefactos_dict[su_artefacto]}. ¿Aceptas? Responde con :accept o :reject\n".encode())
 
     elif comando.startswith(":accept"): # Comando para aceptar intercambio
         # Implementar
@@ -131,7 +131,7 @@ def manejar_mensajes(client_socket, addr):
     clientes.append(client_socket)
 
     # Notificar a los clientes existentes sobre la nueva conexión
-    mensaje_para_todos(f"[SERVER] Cliente {nombres_clientes[addr]} se ha conectado.\n".encode())
+    mensaje_para_todos(f"[SERVER] Cliente {nombres_clientes[client_socket]} se ha conectado.\n".encode())
 
     while True:
         try:
@@ -144,14 +144,14 @@ def manejar_mensajes(client_socket, addr):
                 comandos(client_socket, mensaje, addr)
             else:
                 # Notificar a todos los clientes sobre el mensaje (excepto al remitente)
-                mensaje_para_todos(f"{nombres_clientes[addr]}: {mensaje}\n".encode())
+                mensaje_para_todos(f"{nombres_clientes[client_socket]}: {mensaje}\n".encode())
         except:
             # En caso de error, desconectar al cliente y notificar a los demás
             clientes.remove(client_socket)
             del nombres_clientes[addr]
             client_socket.close()
             addr = str(addr)
-            mensaje_para_todos(f"[SERVER] Cliente {nombres_clientes[addr]} se ha desconectado.\n".encode())
+            mensaje_para_todos(f"[SERVER] Cliente {nombres_clientes[client_socket]} se ha desconectado.\n".encode())
             break
 
     clientes.append(client_socket)
