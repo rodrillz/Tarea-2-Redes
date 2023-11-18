@@ -81,13 +81,12 @@ def intercambiar_artefactos(cliente_origen, cliente_destino, artefacto_origen, a
 # Función para notificar a todos los clientes excepto al remitente
 def mensaje_para_todos(mensaje, sender_socket):
     for cliente in clientes:
-        if cliente != sender_socket:
-            try:
-                cliente.send(mensaje)
-            except:
-                # En caso de error, desconectar al cliente y notificar a los demás
-                clientes.remove(cliente)
-                cliente.close()
+        try:
+            cliente.send(mensaje)
+        except:
+            # En caso de error, desconectar al cliente y notificar a los demás
+            clientes.remove(cliente)
+            cliente.close()
 
 # Función para manejar la conexión de un nuevo cliente
 def manejar_mensajes(client_socket, addr):
