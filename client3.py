@@ -42,5 +42,5 @@ print(respuesta_servidor)
 
 # Enviar mensajes al servidor
 while True:
-    message = input(f"{client_name}: ")
-    client_socket.send(message.encode())
+    mensaje = input()
+    client_socket.send(mensaje.encode())
