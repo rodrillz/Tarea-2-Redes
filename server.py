@@ -93,14 +93,18 @@ def manejar_mensajes(client_socket, addr):
     # Mensaje de bienvenida
     client_socket.send("¡Bienvenid@ al chat de Granjerxs!\n".encode())
     while True:
-        client_socket.send("[SERVER] Cuéntame, ¿qué artefactos tienes?\n".encode())
-
-        # Recibir la lista de números de artefactos
-        artefactos_numeros = client_socket.recv(1024).decode().strip().split(',')
-
         # Obtener los nombres de los artefactos asociados a los números
-        artefactos_nombres = [artefactos_dict.get(artefacto, "Artefacto Desconocido") for artefacto in artefactos_numeros]
+        while True:
+            client_socket.send("[SERVER] Cuéntame, ¿qué artefactos tienes?\n".encode())
 
+             # Recibir la lista de números de artefactos
+            artefactos_numeros = client_socket.recv(1024).decode().strip().split(',')
+            if len(artefactos_numeros) > 6:
+                client_socket.send("[SERVER] El máximo de artefactos por usuario es 6!\n".encode())
+                
+            else:    
+                artefactos_nombres = [artefactos_dict.get(artefacto, "Artefacto Desconocido") for artefacto in artefactos_numeros]
+                break
         # Mostrar los nombres de los artefactos al cliente
         mensaje_arte = "[SERVER] Tus artefactos son: {}\n".format(", ".join(artefactos_nombres))
         client_socket.send(mensaje_arte.encode())
