@@ -1,9 +1,9 @@
 import socket
 import threading
 
-
 host = '127.0.0.1'
 port = 12345
+client_name = "Hardcorito"
 
 # Función para manejar la recepción de mensajes del servidor
 def recibir_mensajes(client_socket):
@@ -42,5 +42,5 @@ print(respuesta_servidor)
 
 # Enviar mensajes al servidor
 while True:
-    message = input()
+    message = input(f"{client_name}: ")
     client_socket.send(message.encode())
