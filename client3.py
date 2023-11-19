@@ -3,7 +3,7 @@ import threading
 
 host = '127.0.0.1'
 port = 12345
-client_name = "Karol Dance"
+client_name = "KarolDance"
 
 # Función para manejar la recepción de mensajes del servidor
 def recibir_mensajes(client_socket):
