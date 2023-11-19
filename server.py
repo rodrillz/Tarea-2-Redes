@@ -38,11 +38,12 @@ def comandos(client_socket, comando):
 
     if comando.startswith(f":p"):    # Comando para mensaje privado
         _, destinatario, mensaje = comando.split(" ", 2)
-        if destinatario not in socket2nombre.keys():
+        if destinatario in list(nombre2socket.keys()):
+            dest_socket = nombre2socket[destinatario]
+            dest_socket.send(f"[MENSAJE PRIVADO de {socket2nombre[nombre2socket[destinatario]]}]: {mensaje}\n".encode())
+        else:
             client_socket.send(f"[SERVER] El cliente que intentas contactar no está conectado o no existe.\n".encode())
             return  
-        dest_socket = nombre2socket[destinatario]
-        dest_socket.send(f"[MENSAJE PRIVADO de {socket2nombre[nombre2socket[destinatario]]}]: {mensaje}\n".encode())
 
     elif comando.startswith(":u"):  # Comando para mostrar los nombres de usuarios conectados
         client_socket.send(f"[SERVER] Usuarios conectados: {list(nombre2socket.keys())}\n".encode())
@@ -138,7 +139,7 @@ def manejar_mensajes(client_socket, addr):
         # Obtener los nombres de los artefactos asociados a los números
         while True:
             client_socket.send("[SERVER] Cuéntame, ¿qué artefactos tienes?\n".encode())
-            
+
              # Recibir la lista de números de artefactos
             artefactos_numeros = client_socket.recv(1024).decode().strip().split(',')
             if len(artefactos_numeros) > 6:
