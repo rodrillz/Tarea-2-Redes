@@ -6,6 +6,9 @@ host = '127.0.0.1'
 port = 12345
 # Lista de clientes conectados
 clientes = []
+nombres_clientes = {}
+sockets = {} 
+
 
 with open('artefactos.json', 'r') as f:
     artefactos_dict = json.load(f)
@@ -15,27 +18,29 @@ artefactos_clientes = {}
 
 def comandos(cliente_socket, comando, addr):
     global clientes
+    global nombres_clientes
+    global sockets
 
     if comando.startswith(f":p"):    # Comando para mensaje privado
         _, destinatario, mensaje = comando.split(" ", 2)
-        destinatario_socket = clientes[int(destinatario)]
-        destinatario_socket.send(f"[MENSAJE PRIVADO de {addr}]: {mensaje}\n".encode())
+        destinatario_socket = sockets[destinatario]
+        destinatario_socket.send(f"[MENSAJE PRIVADO de {nombres_clientes[sockets[destinatario]]}]: {mensaje}\n".encode())
 
     elif comando.startswith(":u"):  # Comando para mostrar los identificadores de usuarios conectados
         lista_usuarios = [str(clientes.index(cliente)) for cliente in clientes]
         cliente_socket.send(f"[SERVER] Usuarios conectados: {', '.join(lista_usuarios)}\n".encode())
 
     elif comando.startswith(":smile"): # Comando para carita feliz
-        mensaje_para_todos(f"{addr}: :)".encode(), cliente_socket)
+        mensaje_para_todos(f"{nombres_clientes[addr]}: :)".encode())
 
     elif comando.startswith(":angry"): # Comando para carita enojada
-        mensaje_para_todos(f"{addr}: >:(".encode(), cliente_socket)
+        mensaje_para_todos(f"{nombres_clientes[addr]}: >:(".encode())
 
     elif comando.startswith(":combito"): # Comando para combito
-        mensaje_para_todos(f"{addr}: Q(’- ’Q)".encode(), cliente_socket)
+        mensaje_para_todos(f"{nombres_clientes[addr]}: Q(’- ’Q)".encode())
 
     elif comando.startswith(":larva"): # Comando para larva
-        mensaje_para_todos(f"{addr}: (:o)OOOooo".encode(), cliente_socket)
+        mensaje_para_todos(f"{nombres_clientes[addr]}: (:o)OOOooo".encode())
 
     elif comando.startswith(":artefactos"): # Comando para mostrar los artefactos del cliente
         cliente_socket.send(f"[SERVER] Tus artefactos son: {', '.join(artefactos_clientes[cliente_socket])}\n".encode())
@@ -79,7 +84,8 @@ def intercambiar_artefactos(cliente_origen, cliente_destino, artefacto_origen, a
         return False
 
 # Función para notificar a todos los clientes excepto al remitente
-def mensaje_para_todos(mensaje, sender_socket):
+def mensaje_para_todos(mensaje):
+    global clientes
     for cliente in clientes:
         try:
             cliente.send(mensaje)
@@ -90,8 +96,11 @@ def mensaje_para_todos(mensaje, sender_socket):
 
 # Función para manejar la conexión de un nuevo cliente
 def manejar_mensajes(client_socket, addr):
+    global nombres_clientes
+
     # Mensaje de bienvenida
     client_socket.send("¡Bienvenid@ al chat de Granjerxs!\n".encode())
+
     while True:
         # Obtener los nombres de los artefactos asociados a los números
         while True:
@@ -119,11 +128,10 @@ def manejar_mensajes(client_socket, addr):
         else:
             client_socket.send("[SERVER] ¡Entendido! Comenzemos de nuevo.\n".encode())
 
-    # Agregar el nuevo cliente a la lista
     clientes.append(client_socket)
 
     # Notificar a los clientes existentes sobre la nueva conexión
-    mensaje_para_todos(f"[SERVER] Cliente {addr} se ha conectado.\n".encode(), client_socket)
+    mensaje_para_todos(f"[SERVER] Cliente {nombres_clientes[addr]} se ha conectado.\n".encode())
 
     while True:
         try:
@@ -136,15 +144,17 @@ def manejar_mensajes(client_socket, addr):
                 comandos(client_socket, mensaje, addr)
             else:
                 # Notificar a todos los clientes sobre el mensaje (excepto al remitente)
-                mensaje_para_todos(f"{addr}: {mensaje}\n".encode(), client_socket)
+                mensaje_para_todos(f"{nombres_clientes[addr]}: {mensaje}\n".encode())
         except:
             # En caso de error, desconectar al cliente y notificar a los demás
             clientes.remove(client_socket)
+            del nombres_clientes[addr]
             client_socket.close()
             addr = str(addr)
-            mensaje_para_todos(f"[SERVER] Cliente {addr} se ha desconectado.\n".encode(), client_socket)
+            mensaje_para_todos(f"[SERVER] Cliente {nombres_clientes[addr]} se ha desconectado.\n".encode())
             break
 
+    clientes.append(client_socket)
 
 # Crear un socket TCP
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -157,5 +167,10 @@ print("Servidor esperando conexiones...")
 
 while True:
     client_socket, addr = server_socket.accept()
+        
+    client_name = client_socket.recv(1024).decode().strip()
+    nombres_clientes[client_socket] = client_name
+    sockets[client_name] = client_socket
+
     cliente_thread = threading.Thread(target = manejar_mensajes, args=(client_socket, addr))
     cliente_thread.start()

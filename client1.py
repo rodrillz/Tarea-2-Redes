@@ -23,6 +23,9 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Conectar al servidor
 client_socket.connect((host, port))
 
+# Enviar username al server
+client_socket.send(client_name.encode())
+
 # Manejar el mensaje de bienvenida
 mensaje_bienvenida = client_socket.recv(1024).decode()
 print(mensaje_bienvenida)
