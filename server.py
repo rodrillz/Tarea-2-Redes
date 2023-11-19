@@ -83,7 +83,7 @@ def intercambiar_artefactos(cliente_origen, cliente_destino, artefacto_origen, a
     else:
         return False
 
-# Función para notificar a todos los clientes excepto al remitente
+# Función para notificar a todos los clientes
 def mensaje_para_todos(mensaje):
     global clientes
     for cliente in clientes:
