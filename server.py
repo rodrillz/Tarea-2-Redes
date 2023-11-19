@@ -72,13 +72,16 @@ def comandos(client_socket, comando):
 
     elif comando.startswith(":offer"): # Comando para ofrecer intercambio
         _, destinatario, mi_artefacto, su_artefacto = comando.split(" ", 3)
-        if ((mi_artefacto in artefactosxcliente[client_socket]) and (su_artefacto in artefactosxcliente[nombre2socket[destinatario]])):
-            client_socket.send("[SERVER] Se ha enviado la solicitud de intercambio, esperando respuesta...\n".encode())
-            dest_socket = nombre2socket[destinatario]
-            dest_socket.send(f"[OFERTA] {socket2nombre[client_socket]} quiere intercambiar {artefactos_dict[mi_artefacto]} por {artefactos_dict[su_artefacto]}. ¿Aceptas? Responde con :accept o :reject\n".encode())
-            intercambiar_artefactos(client_socket, dest_socket, mi_artefacto, su_artefacto)
+        if destinatario in list(nombre2socket.keys()):
+            if ((mi_artefacto in artefactosxcliente[client_socket]) and (su_artefacto in artefactosxcliente[nombre2socket[destinatario]])):
+                client_socket.send("[SERVER] Se ha enviado la solicitud de intercambio, esperando respuesta...\n".encode())
+                dest_socket = nombre2socket[destinatario]
+                dest_socket.send(f"[OFERTA] {socket2nombre[client_socket]} quiere intercambiar {artefactos_dict[mi_artefacto]} por {artefactos_dict[su_artefacto]}. ¿Aceptas? Responde con :accept o :reject\n".encode())
+                intercambiar_artefactos(client_socket, dest_socket, mi_artefacto, su_artefacto)
+            else:
+                client_socket.send("[SERVER] Uno de los artefactos que ingresaste no está disponible para intercambiar.\n".encode())
         else:
-            client_socket.send("[SERVER] Uno de los artefactos que ingresaste no está disponible para intercambiar.\n".encode())
+            client_socket.send("[SERVER] El cliente con el que intentas intercambiar no existe o no está conectado.\n".encode())
 
     elif comando.startswith(":accept"): # Comando para aceptar intercambio
         acepta[client_socket] = "acepta"
@@ -135,15 +138,17 @@ def manejar_mensajes(client_socket, addr):
         # Obtener los nombres de los artefactos asociados a los números
         while True:
             client_socket.send("[SERVER] Cuéntame, ¿qué artefactos tienes?\n".encode())
-
+            
              # Recibir la lista de números de artefactos
             artefactos_numeros = client_socket.recv(1024).decode().strip().split(',')
             if len(artefactos_numeros) > 6:
                 client_socket.send("[SERVER] El máximo de artefactos por usuario es 6!\n".encode())
-                
+            if len(artefactos_numeros) == 0:
+                client_socket.send("[SERVER] Es necesario que ingreses al menos 1 artefacto.\n".encode())  
             else:    
                 artefactos_nombres = [artefactos_dict.get(artefacto, "Artefacto Desconocido") for artefacto in artefactos_numeros]
                 break
+        
         # Mostrar los nombres de los artefactos al cliente
         mensaje_arte = "[SERVER] Tus artefactos son: {}\n".format(", ".join(artefactos_nombres))
         client_socket.send(mensaje_arte.encode())
