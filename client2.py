@@ -3,7 +3,7 @@ import threading
 
 host = '127.0.0.1'
 port = 12345
-client_name = "Pop Lolita"
+client_name = "PopLolita"
 
 # Función para manejar la recepción de mensajes del servidor
 def recibir_mensajes(client_socket):
@@ -22,6 +22,9 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Conectar al servidor
 client_socket.connect((host, port))
+
+# Enviar username al server
+client_socket.send(client_name.encode())
 
 # Manejar el mensaje de bienvenida
 mensaje_bienvenida = client_socket.recv(1024).decode()
